@@ -53,6 +53,7 @@ byte Life_Points; // Amount of lifes
 const int Unit_Address = 1; //change the address for each unit
 bool Special_Ammo_Flag; //special fire mode
 byte Special_Ammo_Status;
+byte playerhex;
 
 //setup startup parameters
 bool startflag = false;
@@ -200,7 +201,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 
   }
 
-  while (secondmenuflag = true)
+  while (secondmenuflag = true) // go into the second menu
   {
     bool displayflag = digitalRead(Reload_Pin);
     bool selectflag = digitalRead(Trigger_Pin);
@@ -230,7 +231,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 
 void trigger()
 {
-  digitalWrite(IR_LED_Pin, HIGH);
+  irsend.sendSony(playerhex, 12);
 }
 
 
