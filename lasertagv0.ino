@@ -62,11 +62,12 @@ byte Ammo_Status; //Amount of ammo left
 byte Clip_size; //give the start ammount of each clip
 byte Life_Points; // Amount of lifes
 const int Unit_Address = 1; //change the address for each unit
-bool Special_Ammo_Flag; //special fire mode
-byte Special_Ammo_Status;
+//bool Special_Ammo_Flag; //special fire mode (future use)
+//byte Special_Ammo_Status;
 byte sendCode;
 int firerate = 1000; // rate of fire in full auto mode
-int reload_rate = 10000;
+int reload_rate = 10000; //how quickly can there be reloaded
+
 //setup startup parameter flags
 bool startflag = false;
 bool Online_Offline; //Login to server or without server
@@ -263,15 +264,15 @@ void offline() //function for setting up the gameparameters when offline mode is
 
 void button_read(){
 	
-	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire => firerate)
+	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire => firerate && Ammo_Status > 0) //read triggerpin if button is pressed and ammo is available firing signal will be send.
 	{
 		trigger();
-		previoustime = millis()
+		previoustime = millis();
 	}
 
-	if (digitalRead(Reload_Pin) == HIGH && millis() - previoustime_reload =>  reload_rate)
+	if (digitalRead(Reload_Pin) == HIGH && millis() - previoustime_reload =>  reload_rate) //reload the clip give the gun the amount of bullets defined in Clip_size variable
 	{
-		Ammo_Status = Clip_size
+		Ammo_Status = Clip_size;
 	}
 	
 }
