@@ -54,24 +54,32 @@ const byte Trigger_Pin = 3; //Trigger switch
 const byte Reload_Pin = 4; //Reload switch
 const byte SpecAmmoButtonPin = 5;
 
+
 //Game settings
 byte playerno; // playernumber (1-12)
 byte teamno; // teamnumber (blue = 1; red = 2) 
 byte Ammo_Status; //Amount of ammo left
+byte Clip_size; //give the start ammount of each clip
 byte Life_Points; // Amount of lifes
 const int Unit_Address = 1; //change the address for each unit
 bool Special_Ammo_Flag; //special fire mode
 byte Special_Ammo_Status;
 byte sendCode;
-
+int firerate = 1000; // rate of fire in full auto mode
+int reload_rate = 10000;
 //setup startup parameter flags
 bool startflag = false;
 bool Online_Offline; //Login to server or without server
 bool sendCodeCalculation = false;
 
+//global variables for debouncing or buttonreadings
+long previoustime_fire;
+long previoustime_reload;
+
 
 //IR send library
 IRsend irsend(IR_LED_Pin);
+
 
 void setup() 
 {
@@ -110,7 +118,11 @@ void loop()
         sendcode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
     sendCodeCalculation = true;
     }
-}
+
+	button_read();
+	
+	}
+
 
 void startup()
 {
@@ -249,9 +261,27 @@ void offline() //function for setting up the gameparameters when offline mode is
 }
 
 
+void button_read(){
+	
+	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire => firerate)
+	{
+		trigger();
+		previoustime = millis()
+	}
+
+	if (digitalRead(Reload_Pin) == HIGH && millis() - previoustime_reload =>  reload_rate)
+	{
+		Ammo_Status = Clip_size
+	}
+	
+}
+	
 void trigger()
 {
-  irsend.sendSony(sendCode, 12);
+  for(byte i=0; i<3 ; i++)
+  {
+	  irsend.sendSony(sendCode, 12);
+  }
 }
 
 
