@@ -53,10 +53,12 @@ byte Life_Points; // Amount of lifes
 const int Unit_Address = 1; //change the address for each unit
 bool Special_Ammo_Flag; //special fire mode
 byte Special_Ammo_Status;
+byte sendCode;
 
 //setup startup parameters
 bool startflag = false;
 bool Online_Offline; //Login to server or without server
+bool sendCodeCalculation = false;
 
 void setup() 
 {
@@ -80,7 +82,7 @@ void setup()
 
 void loop() 
 {
-  while (startflag == false) { //run sort of setup for starting without using startup function
+  while (startflag == false) { //run sort of setup for starting without using setup function
     startup();
   }
   if (Online_Offline == true)
@@ -89,11 +91,17 @@ void loop()
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
   }
+
+    if (sendCodeCalculation == false)
+    {
+        sendcode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
+    sendCodeCalculation = true;
+    }
 }
 
 void startup()
 {
-  bool flag = false;
+  bool flag = false; //print selection screen once
   if (flag == false) {
     lcd.setCursor(0, 0);
     lcd.println(">online mode");
@@ -101,10 +109,11 @@ void startup()
     flag = true;
   }
 
-  bool displayflag = false;
-  bool displayselect = digitalRead(Reload_Pin);
-
-  if (displayselect == HIGH && displayflag == false )
+  bool displayflag = false; //local flag for determining what position the lcd has
+  bool displayselect = digitalRead(Reload_Pin);  //read the input button to make cycle between screens
+   bool dispayselect = digitalRead(Trigger_Pin); //read the input button to make selection
+    
+  if (displayselect == HIGH && displayflag == false ) //scroll to offline mode
   {
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -113,7 +122,7 @@ void startup()
     bool displayflag = true;
   }
 
-  else if (displayselect == HIGH && displayflag == true)
+  else if (displayselect == HIGH && displayflag == true) //scroll to online mode
   {
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -122,29 +131,29 @@ void startup()
     bool displayflag = true;
   }
 
-  bool dispayselect = digitalRead(Trigger_Pin);
-  if (displayselect == HIGH && displayflag == false)
+ 
+ else if (displayselect == HIGH && displayflag == false) //selection button pressed going to online mode.
   {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.println("online selected");
     lcd.print("please wait...");
     delay(2000);
-    startflag = true;
-    Online_Offline = true;
-    online();
+    startflag = true; //get out of the startup loop
+    Online_Offline = true; //set flag for online mode so online loop goes into effect
+    online(); // go to online function
   }
 
-  else if (displayselect == HIGH && displayflag == true)
+  else if (displayselect == HIGH && displayflag == true) //selection button pressed going to offline mode.
   {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.println("offline selected");
     lcd.print("please wait...");
     delay(1500);
-    startflag = true;
-    Online_Offline = false;
-    offline();
+    startflag = true; //set flag to exit startup while loop
+    Online_Offline = false; //set flag to not enter the online loop
+    offline(); //continue to offline setup parameters.
   }
 }
 
@@ -152,8 +161,8 @@ void startup()
 
 void offline() //function for setting up the gameparameters when offline mode is used
 {
-  bool offlineflag = false;
-  bool secondmenuflag = false;
+  bool offlineflag = false; //set flag to loop the first offline menu only
+  bool secondmenuflag = false; //go into the second offline menu flag
   while (offlineflag == false)
   {
     lcd.clear();
@@ -199,7 +208,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 
   }
 
-  while (secondmenuflag = true)
+  while (secondmenuflag = true) // go into the second menu
   {
     bool displayflag = digitalRead(Reload_Pin);
     bool selectflag = digitalRead(Trigger_Pin);
@@ -229,7 +238,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 
 void trigger()
 {
-  digitalWrite(IR_LED_Pin, HIGH);
+  irsend.sendSony(playerhex, 12);
 }
 
 
