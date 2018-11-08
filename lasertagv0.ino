@@ -53,11 +53,12 @@ byte Life_Points; // Amount of lifes
 const int Unit_Address = 1; //change the address for each unit
 bool Special_Ammo_Flag; //special fire mode
 byte Special_Ammo_Status;
-byte playerhex;
+byte sendCode;
 
 //setup startup parameters
 bool startflag = false;
 bool Online_Offline; //Login to server or without server
+bool sendCodeCalculation = false;
 
 void setup() 
 {
@@ -81,7 +82,7 @@ void setup()
 
 void loop() 
 {
-  while (startflag == false) { //run sort of setup for starting without using startup function
+  while (startflag == false) { //run sort of setup for starting without using setup function
     startup();
   }
   if (Online_Offline == true)
@@ -90,6 +91,11 @@ void loop()
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
   }
+
+    if (sendCodeCalculation == false)
+    {
+        sendcode = (playerno + (teamno * 16)) // get a hex formatted no. like this 0x
+
 }
 
 void startup()
