@@ -94,8 +94,9 @@ void loop()
 
     if (sendCodeCalculation == false)
     {
-        sendcode = (playerno + (teamno * 16)) // get a hex formatted no. like this 0x
-
+        sendcode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
+    sendCodeCalculation = true;
+    }
 }
 
 void startup()
