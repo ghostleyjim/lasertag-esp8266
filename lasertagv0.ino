@@ -11,6 +11,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+//ESP8266 libraries
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ArduinoOTA.h>
@@ -18,6 +19,14 @@
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <WebSocketsServer.h>
+
+//IR libraries
+#ifndef UNIT_TEST
+#include <Arduino.h>
+#endif
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+
 
 // wifi global variables
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
@@ -55,10 +64,14 @@ bool Special_Ammo_Flag; //special fire mode
 byte Special_Ammo_Status;
 byte sendCode;
 
-//setup startup parameters
+//setup startup parameter flags
 bool startflag = false;
 bool Online_Offline; //Login to server or without server
 bool sendCodeCalculation = false;
+
+
+//IR send library
+IRsend irsend(IR_LED_Pin);
 
 void setup() 
 {
@@ -92,7 +105,7 @@ void loop()
   ArduinoOTA.handle();                        // listen for OTA events
   }
 
-    if (sendCodeCalculation == false)
+    if (sendCodeCalculation == false) //calculate txcode once
     {
         sendcode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
     sendCodeCalculation = true;
@@ -238,7 +251,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 
 void trigger()
 {
-  irsend.sendSony(playerhex, 12);
+  irsend.sendSony(sendCode, 12);
 }
 
 
