@@ -6,6 +6,11 @@
     for more information on the license please check the LICENSE.TXT file
 */
 
+//**********************************************************************************************************************************************************************************************
+//**********************************************************************************************************************************************************************************************
+//********************************************************************* Global Variables *******************************************************************************************************
+//**********************************************************************************************************************************************************************************************
+//**********************************************************************************************************************************************************************************************
 
 //Display driver
 #include <Wire.h>
@@ -65,8 +70,8 @@ const int Unit_Address = 1; //change the address for each unit
 //bool Special_Ammo_Flag; //special fire mode (future use)
 //byte Special_Ammo_Status;
 byte sendCode;
-int firerate = 1000; // rate of fire in full auto mode
-int reload_rate = 10000; //how quickly can there be reloaded
+int firerate = 1000; // rate of fire in full auto mode (mS)
+int reload_rate = 10000; //how quickly can there be reloaded (mS)
 
 //setup startup parameter flags
 bool startflag = false;
@@ -262,7 +267,7 @@ void offline() //function for setting up the gameparameters when offline mode is
 }
 
 
-void button_read(){
+void button_read(){ //read button states
 	
 	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire => firerate && Ammo_Status > 0) //read triggerpin if button is pressed and ammo is available firing signal will be send.
 	{
@@ -277,7 +282,7 @@ void button_read(){
 	
 }
 	
-void trigger()
+void trigger() // function to fire the led
 {
   for(byte i=0; i<3 ; i++)
   {
@@ -285,9 +290,17 @@ void trigger()
   }
 }
 
+void received()
+{
+irreceive(
 
+}
 
-
+void decode()
+{
+	rec_playerno = % (incoming/16);
+	rec_teamno = (incoming - rec_playerno);
+}
 
 
 
