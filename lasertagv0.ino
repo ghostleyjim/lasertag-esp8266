@@ -59,7 +59,7 @@ const byte IR_Receive_Pin = 14; //IR receiver
 const byte Trigger_Pin = 3; //Trigger switch
 const byte Reload_Pin = 6; //Reload switch
 const byte SpecAmmoButtonPin = 5;
-
+const byte Red_LED = 7;
 
 //Game settings
 byte playerno; // playernumber (1-12)
@@ -93,7 +93,7 @@ long previoustime_reload;
 IRsend irsend(IR_LED_Pin);
 IRrecv irrecv(IR_Receive_Pin);
 decode_results incoming;
-int ReceivedInt;
+
 void setup() 
 {
   //pinmode declerations
@@ -102,7 +102,7 @@ void setup()
   pinMode(Trigger_Pin, INPUT);
   pinMode(Reload_Pin, INPUT);
   pinMode(SpecAmmoButtonPin, INPUT);
-
+  pinMode(Red_LED, OUTPUT);
   //lcd initializing
   lcd.begin();
   lcd.backlight();
@@ -290,25 +290,27 @@ void button_read(){ //read button states
 	
 }
 	
-void trigger() // function to fire the led
+void trigger() // function to light up the led
 {
+
   for(byte i=0; i<3 ; i++)
   {
 	  irsend.sendSony(sendCode, 12);
   }
-}
 
-void received()
+
+int received()
 {
-ReceivedInt = irrecv.decode(&incoming);
+int ReceivedInt = irrecv.decode(&incoming);
 irrecv.resume();
-
+decode(int ReceivedInt);
 }
 
-void decode()
+void decode(int message)
 {
-	rec_playerno = (ReceivedInt % 16); //take the modulo of the incoming signal (i.e. 18 % 16 = 2) 
-	rec_teamno = ((ReceivedInt - rec_playerno)/16); //subtract playerno from incoming signal 18 - 2 divide it by 16 to get teamnumber
+	rec_playerno = (message % 16); //take the modulo of the incoming signal (i.e. 18 % 16 = 2) 
+	rec_teamno = ((message - rec_playerno)/16); //subtract playerno from incoming signal 18 - 2 divide it by 16 to get teamnumber
+
 }
 
 
