@@ -297,7 +297,7 @@ void trigger() // function to light up the led
   {
 	  irsend.sendSony(sendCode, 12);
   }
-
+}
 
 int received()
 {
