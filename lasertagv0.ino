@@ -6,6 +6,11 @@
     for more information on the license please check the LICENSE.TXT file
 */
 
+//**********************************************************************************************************************************************************************************************
+//**********************************************************************************************************************************************************************************************
+//********************************************************************* Global Variables *******************************************************************************************************
+//**********************************************************************************************************************************************************************************************
+//**********************************************************************************************************************************************************************************************
 
 //Display driver
 #include <Wire.h>
@@ -26,7 +31,8 @@
 #endif
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
-
+#include <IRrecv.h>
+#include <IRutils.h>
 
 // wifi global variables
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
@@ -48,12 +54,12 @@ const char* mdnsName = "laser"; // Domain name for the mDNS responder
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 //Pin declarations
-const byte IR_LED_Pin = 7; //IR Transmitter
-const byte IR_Receive_Pin = 8; //IR receiver
+const byte IR_LED_Pin = 4; //IR Transmitter
+const byte IR_Receive_Pin = 14; //IR receiver
 const byte Trigger_Pin = 3; //Trigger switch
-const byte Reload_Pin = 4; //Reload switch
+const byte Reload_Pin = 6; //Reload switch
 const byte SpecAmmoButtonPin = 5;
-
+const byte Red_LED = 7;
 
 //Game settings
 byte playerno; // playernumber (1-12)
@@ -65,8 +71,13 @@ const int Unit_Address = 1; //change the address for each unit
 //bool Special_Ammo_Flag; //special fire mode (future use)
 //byte Special_Ammo_Status;
 byte sendCode;
-int firerate = 1000; // rate of fire in full auto mode
-int reload_rate = 10000; //how quickly can there be reloaded
+int firerate = 1000; // rate of fire in full auto mode (mS)
+int reload_rate = 10000; //how quickly can there be reloaded (mS)
+
+
+//received data
+byte rec_playerno;
+byte rec_teamno;
 
 //setup startup parameter flags
 bool startflag = false;
@@ -78,9 +89,10 @@ long previoustime_fire;
 long previoustime_reload;
 
 
-//IR send library
+//IR library
 IRsend irsend(IR_LED_Pin);
-
+IRrecv irrecv(IR_Receive_Pin);
+decode_results incoming;
 
 void setup() 
 {
@@ -90,7 +102,7 @@ void setup()
   pinMode(Trigger_Pin, INPUT);
   pinMode(Reload_Pin, INPUT);
   pinMode(SpecAmmoButtonPin, INPUT);
-
+  pinMode(Red_LED, OUTPUT);
   //lcd initializing
   lcd.begin();
   lcd.backlight();
@@ -116,7 +128,7 @@ void loop()
 
     if (sendCodeCalculation == false) //calculate txcode once
     {
-        sendcode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
+        sendCode = (playerno + (teamno * 16)); // get a hex formatted no. like this 0x1(teamno 1)c(player 12)
     sendCodeCalculation = true;
     }
 
@@ -262,32 +274,44 @@ void offline() //function for setting up the gameparameters when offline mode is
 }
 
 
-void button_read(){
+void button_read(){ //read button states
 	
-	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire => firerate && Ammo_Status > 0) //read triggerpin if button is pressed and ammo is available firing signal will be send.
+	if(digitalRead(Trigger_Pin) == HIGH && millis() - previoustime_fire >= firerate && Ammo_Status > 0) //read triggerpin if button is pressed and ammo is available firing signal will be send.
 	{
 		trigger();
-		previoustime = millis();
+		previoustime_fire = millis();
 	}
 
-	if (digitalRead(Reload_Pin) == HIGH && millis() - previoustime_reload =>  reload_rate) //reload the clip give the gun the amount of bullets defined in Clip_size variable
+	if (digitalRead(Reload_Pin) == HIGH && millis() - previoustime_reload >=  reload_rate) //reload the clip give the gun the amount of bullets defined in Clip_size variable
 	{
 		Ammo_Status = Clip_size;
+    previoustime_reload = millis();
 	}
 	
 }
 	
-void trigger()
+void trigger() // function to light up the led
 {
+
   for(byte i=0; i<3 ; i++)
   {
 	  irsend.sendSony(sendCode, 12);
   }
 }
 
+int received()
+{
+int ReceivedInt = irrecv.decode(&incoming);
+irrecv.resume();
+decode(int ReceivedInt);
+}
 
+void decode(int message)
+{
+	rec_playerno = (message % 16); //take the modulo of the incoming signal (i.e. 18 % 16 = 2) 
+	rec_teamno = ((message - rec_playerno)/16); //subtract playerno from incoming signal 18 - 2 divide it by 16 to get teamnumber
 
-
+}
 
 
 
